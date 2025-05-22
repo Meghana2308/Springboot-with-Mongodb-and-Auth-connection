@@ -22,17 +22,6 @@ public class BookController {
     @Autowired
     private UserService userService;
 
-//    @GetMapping("books/{username}")
-//    public ResponseEntity<List<Book>> getAllBooks(@PathVariable String username) {
-//        User user = userService.findByUsername(username);
-//        List<Book> books =user.getAllBooks();
-////      List<Book> books = bookService.getAllBooks();
-//        if(books != null && !books.isEmpty()){
-//            return new ResponseEntity<>(books, HttpStatus.OK);
-//        }else {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     @GetMapping("/books/{username}")
     public ResponseEntity<?> getAllBookOfUser(@PathVariable String username) {
