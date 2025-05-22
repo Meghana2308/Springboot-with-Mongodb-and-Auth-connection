@@ -22,26 +22,39 @@ public class BookController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/books")
-    public ResponseEntity<List<Book>> getAllBooks() {
-        List<Book> books = bookService.getAllBooks();
-        return new ResponseEntity<>(books, HttpStatus.OK);
-    }
+//    @GetMapping("books/{username}")
+//    public ResponseEntity<List<Book>> getAllBooks(@PathVariable String username) {
+//        User user = userService.findByUsername(username);
+//        List<Book> books =user.getAllBooks();
+////      List<Book> books = bookService.getAllBooks();
+//        if(books != null && !books.isEmpty()){
+//            return new ResponseEntity<>(books, HttpStatus.OK);
+//        }else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable ObjectId id) {
-        try {
-            return new ResponseEntity<>(bookService.getBookById(id), HttpStatus.OK);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @GetMapping("/books/{username}")
+    public ResponseEntity<?> getAllBookOfUser(@PathVariable String username) {
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        List<Book> books = user.getBook();
+        if (books != null && !books.isEmpty()) {
+            return new ResponseEntity<>(books, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("No books found", HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/addBooks")
-    public ResponseEntity<Book> addBooks(@RequestBody Book book) {
+    @PostMapping("/{username}")
+    public ResponseEntity<Book> addBooks(@RequestBody Book book, @PathVariable String username) {
         try {
-            bookService.addBook(book);
-            return new ResponseEntity<>(HttpStatus.OK);
+            User user = userService.findByUsername(username);
+            bookService.addBook(book, username);
+            return new ResponseEntity<>(book, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

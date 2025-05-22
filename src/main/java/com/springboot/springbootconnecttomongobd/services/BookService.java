@@ -1,6 +1,7 @@
 package com.springboot.springbootconnecttomongobd.services;
 
 import com.springboot.springbootconnecttomongobd.entity.Book;
+import com.springboot.springbootconnecttomongobd.entity.User;
 import com.springboot.springbootconnecttomongobd.execption.UserNotFoundException;
 import com.springboot.springbootconnecttomongobd.repository.BookRepository;
 import org.bson.types.ObjectId;
@@ -16,8 +17,18 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    public Book addBook(Book book) {
-        return bookRepository.save(book);
+    @Autowired
+    private UserService userService;
+
+    public void addBook(Book book, String username) {
+        try {
+            User user = userService.findByUsername(username);
+            Book updatedbook = bookRepository.save(book);
+            user.getBook().add(updatedbook);
+            userService.addUser(user);
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while saving the entry.", e);
+        }
     }
 
     public List<Book> getAllBooks() {
