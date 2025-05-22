@@ -3,11 +3,8 @@ package com.springboot.springbootconnecttomongobd.services;
 import com.springboot.springbootconnecttomongobd.entity.Book;
 import com.springboot.springbootconnecttomongobd.execption.UserNotFoundException;
 import com.springboot.springbootconnecttomongobd.repository.BookRepository;
-import jakarta.validation.constraints.Null;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +21,7 @@ public class BookService {
     }
 
     public List<Book> getAllBooks() {
-       return bookRepository.findAll();
+        return bookRepository.findAll();
     }
 
     public Book getBookById(ObjectId id) throws UserNotFoundException {
@@ -32,7 +29,7 @@ public class BookService {
                 .orElseThrow(() -> new UserNotFoundException("Book not found with id: " + id));
     }
 
-    public Book UpdateBook(String id, Book book) {
+    public Book UpdateBook(Book book, String id) {
         ObjectId objectId = new ObjectId(id); // Convert from string to ObjectId
         Book existingBook = bookRepository.findById(objectId)
                 .orElseThrow(() -> new RuntimeException("Book not found with id " + id));
@@ -40,10 +37,21 @@ public class BookService {
             existingBook.setTitle(book.getTitle());
             existingBook.setContent(book.getContent());
         }
-        return bookRepository.save(book);
+        return bookRepository.save(existingBook);
+//        try {
+//            User user = userService.findByUsername(username);
+//            Book updatedbook = bookRepository.save(book);
+//            user.getBook().add(updatedbook);
+//            userService.addUser(user);
+//        } catch (Exception e) {
+//            throw new RuntimeException("An error occurred while saving the entry.", e);
+//        }
     }
 
-    public void deleteBookById(ObjectId id) throws UserNotFoundException {
+
+
+
+    public void deleteById(ObjectId id) throws UserNotFoundException {
         Optional<Book> book = bookRepository.findById(id);
         if(book.isPresent()){
             bookRepository.deleteById(id);
