@@ -20,8 +20,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private BookService bookService;
 
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {

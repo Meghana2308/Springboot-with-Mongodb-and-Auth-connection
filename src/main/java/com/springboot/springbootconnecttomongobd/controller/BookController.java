@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+
 @RestController
 public class BookController {
 
@@ -41,7 +42,7 @@ public class BookController {
     @PostMapping("/{username}")
     public ResponseEntity<Book> addBooks(@RequestBody Book book, @PathVariable String username) {
         try {
-            User user = userService.findByUsername(username);
+            //User user = userService.findByUsername(username);
             bookService.addBook(book, username);
             return new ResponseEntity<>(book, HttpStatus.OK);
         } catch (Exception e) {
@@ -49,15 +50,38 @@ public class BookController {
         }
     }
 
+    @PutMapping("/{username}/{id}")
+    public ResponseEntity<?> updateBook(@PathVariable String username, @PathVariable ObjectId id, @RequestBody Book book) throws UserNotFoundException {
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with username: " + username);
+        }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Book> UpdateBook(@PathVariable String id, @RequestBody Book book) {
-        return new ResponseEntity<>(bookService.UpdateBook(book, id), HttpStatus.OK);
+        boolean bookBelongsToUser = user.getBook().stream().anyMatch(b -> b.getId().equals(id));
+        if (!bookBelongsToUser) {
+            return new ResponseEntity<>("Book does not belong to user", HttpStatus.FORBIDDEN);
+        }
+
+        Book existingBook = bookService.findById(id);
+        if (existingBook == null) {
+            return new ResponseEntity<>("Book not found", HttpStatus.NOT_FOUND);
+        }
+
+        // Update fields
+        if (book.getTitle() != null && !book.getTitle().isEmpty()) {
+            existingBook.setTitle(book.getTitle());
+        }
+        if (book.getContent() != null && !book.getContent().isEmpty()) {
+            existingBook.setContent(book.getContent());
+        }
+
+        bookService.updateBook(existingBook, String.valueOf(id));
+        return new ResponseEntity<>(existingBook, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBook(@PathVariable ObjectId id) throws UserNotFoundException {
-        bookService.deleteById(id);
+    @DeleteMapping("/{username}/{id}")
+    public ResponseEntity<?> deleteBook(@PathVariable ObjectId id, @PathVariable String username) {
+        bookService.deleteById(id, username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
